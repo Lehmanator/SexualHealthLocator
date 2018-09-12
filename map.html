@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title> Sexual Well-being Resource Locator</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <link href="css/materialdesignicons.min.css" media="all" rel="stylesheet" type="text/css" />
+    <link rel="shortcut icon" type="image/x-icon" href="images/favicon-shield.ico" />
+    <link href="css/styles.css" rel="stylesheet" type="text/css" />
+    </link>
+    <script>
+        var map;
+        var infowindow;
+        var service;
+
+        var apiGeolocationSuccess = function (position) {
+            console.log("API geolocation success!\n\nlat = " + position.coords.latitude + "\nlng = " + position.coords
+                .longitude);
+            map = document.getElementById("map");
+            map.innerHTML = "<p id='coords'>" + position.coords.latitude + ',' + position.coords.longitude + "</p>";
+            initMap();
+        };
+        var tryAPIGeolocation = function () {
+            var locationURL =
+                "https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyD3esafwShGXpUBOTZBaV-K-ZO-Npi4pic";
+
+            const Http = new XMLHttpRequest();
+            Http.open("POST", locationURL);
+            Http.setRequestHeader("Content-type", "application/json");
+            Http.send();
+
+            Http.onreadystatechange = function (success) {
+                apiGeolocationSuccess({
+                    coords: {
+                        latitude: success.location.lat,
+                        longitude: success.location.lng
+                    }
+                });
+                if (this.readyState == 4 && this.status == 200) {
+                    console.log(Http.responseText);
+                    latitude = JSON.parse(Http.responseText);
+
+                }
+            }
+
+
+        };
+
+        var browserGeolocationSuccess = function (position) {
+            console.log("Browser geolocation success!\n\nlat = " + position.coords.latitude + "\nlng = " + position
+                .coords.longitude);
+            map = document.getElementById("map");
+            map.innerHTML = "<p id='coords'>" + position.coords.latitude + ',' + position.coords.longitude + "</p>";
+            initMap();
+        };
+
+        var browserGeolocationFail = function (error) {
+            switch (error.code) {
+                case error.TIMEOUT:
+                    console.log("Browser geolocation error !\n\nTimeout.");
+                    break;
+                case error.PERMISSION_DENIED:
+                    if (error.message.indexOf("Only secure origins are allowed") == 0) {
+                        tryAPIGeolocation();
+                    }
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    console.log("Browser geolocation error !\n\nPosition unavailable.");
+                    break;
+            }
+        };
+
+        var tryGeolocation = function () {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    browserGeolocationSuccess,
+                    browserGeolocationFail, {
+                        maximumAge: 50000,
+                        timeout: 20000,
+                        enableHighAccuracy: true
+                    });
+            }
+        };
+
+        function initMap() {
+            var state_college = {
+                lat: 40.7928832,
+                lng: -77.8674176
+            };
+
+            coords = document.getElementById("coords");
+            [latitude, longitude] = coords.innerHTML.split(",");
+            console.log(latitude, longitude);
+            var my_location = {
+                lat: Number(latitude),
+                lng: Number(longitude)
+            };
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: my_location,
+                zoom: 14,
+            });
+            var person = "images/favicon-bullseye.ico";
+            var me = new google.maps.Marker({
+                map: map,
+                position: map.getCenter(),
+                title: "Your location",
+                icon: person
+            });
+            infowindow = new google.maps.InfoWindow();
+            service = new google.maps.places.PlacesService(map);
+
+            var keyword_list = ["std testing", "women support group", "pregnancy clinic", "lgbt support group",
+                "sexual health", "obgyn", "sex therapy", "domestic violence support"
+            ];
+
+            for (var item in keyword_list) {
+                service.nearbySearch({
+                    location: my_location,
+                    radius: 40000,
+                    keyword: keyword_list[item]
+                }, callback);
+            }
+        }
+
+        function callback(results, status) {
+            console.log("Returned " + results.length + " results");
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                for (var i = 0; i < results.length; i++) {
+                    var t1 = results[i].types[0];
+                    var t2 = results[i].types[1];
+                    console.log(results[i].name, t1, t2);
+                    if ((t1 != "bar" && t2 != "bar") &&
+                        (t1 != "police" && t2 != "police") &&
+                        (t1 != "university" && t2 != "establishment") &&
+                        (t1 != "store" && t2 != "store")) {
+                        placeMarker(results[i]);
+                    }
+                }
+            } else {
+                console.log(status);
+            }
+        }
+
+        function placeMarker(place) {
+            var marker = new google.maps.Marker({
+                map: map,
+                position: place.geometry.location,
+                title: place.name,
+                maxWidth: 450
+            });
+            marker.addListener("click", getDetails(marker, place));
+        }
+
+        function getDetails(marker, place, event) {
+            return function () {
+                service.getDetails({
+                    placeId: place.place_id,
+                    fields: ['name', 'rating', 'formatted_phone_number', 'photo', 'type',
+                        'formatted_address',
+                        'website', 'geometry', 'url', 'opening_hours'
+                    ]
+                }, detailsCallback(marker));
+            };
+        }
+
+        function detailsCallback(marker, details, status) {
+            return function (dets, stat) {
+                if (stat === google.maps.places.PlacesServiceStatus.OK) {
+                    // Wrapper begin
+                    var contentString = `<div id="wrapper">`;
+                    // Photos
+                    if (dets.photos) {
+                        var photo_count = 1;
+                        contentString += `<div id="detail_img">`;
+                        if (dets.photos[2]) {
+                            photo_count = 3;
+                            var photo3 = dets.photos[2].getUrl({
+                                maxWidth: 600 / photo_count
+                            });
+                            contentString += `<img class="detail_image" src="${photo3}">`;
+                        } else {
+                            photo_count = 2;
+                        }
+                        if (dets.photos[1]) {
+                            var photo2 = dets.photos[1].getUrl({
+                                maxWidth: 600 / photo_count
+                            });
+                            contentString += `<img class="detail_image" src="${photo2}">`;
+                        } else {
+                            photo_count = 1;
+                        }
+                        var photo1 = dets.photos[0].getUrl({
+                            maxWidth: 600 / photo_count
+                        });
+                        contentString += `<img class="detail_image" src="${photo1}">`;
+                    }
+                    contentString += `</div>`; // End photo div
+                    // Title
+                    contentString +=
+                        `<span id="titleline"><div id="title"><a class="ti" href="${dets.url}"><h1 id="popup_title">${dets.name}</h1></a></div>`;
+                    if (dets.types) {
+                        contentString += `<div class="list"><ul class="type">`;
+                        var count = 0;
+                        for (i in dets.types) {
+
+                            var s = dets.types[i];
+                            var upper = s.charAt(0).toUpperCase() + s.substr(1);
+                            if (upper == "Point_of_interest" ||
+                                upper == "establishment" ||
+                                upper == "Store") {} else {
+                                contentString = contentString + '<li class="type">' + upper + "</li>";
+                                count += 1;
+                            }
+                            if (count >= 3) {
+                                break;
+                            }
+                        }
+                        contentString += `</div></ul>`;
+                    }
+                    contentString += `</span>`;
+                    // Detail div
+                    contentString += `<div id="detail_info">`;
+                    contentString +=
+                        `<i class="mdi mdi-map-marker"></i>    <a class="mdi" href="${dets.url}">    ${dets.formatted_address}</a><br>`;
+                    if (dets.formatted_phone_number) {
+                        contentString +=
+                            `<i class="mdi mdi-phone"></i>    <a class="mdi" href="tel:${dets.formatted_phone_number}">    ${dets.formatted_phone_number}</a><br>`;
+                    }
+                    if (dets.website) {
+                        contentString +=
+                            `<i class="mdi mdi-earth"></i>   <a class="mdi" href="${dets.website}">    ${dets.website}</a><br>`;
+                    }
+                    if (dets.rating) {
+                        contentString +=
+                            `<i class="mdi mdi-star"></i>    Rating:    ${dets.rating}/5.0`;
+                    }
+                    if (dets.opening_hours) {
+                        contentString += `<div id="hours">`;
+                        if (dets.opening_hours.open_now) {
+                            contentString +=
+                                `<i class="mdi mdi-calendar-clock"></i><span id="open"><b>Open Now!</b></span>`;
+                        }
+                        if (dets.opening_hours.weekday_text) {
+                            contentString += `<ul id="hour_list">`;
+                            for (var item in dets.opening_hours.weekday_text) {
+                                var s = dets.opening_hours.weekday_text[item];
+                                var [weekday, hours] = s.split(": ", 2);
+                                contentString +=
+                                    `<li class="schedule_item"><span><div class="day">${weekday}</div><div class="hrs">${hours}</div></span></li>`;
+                            }
+                            contentString += `</ul>`;
+                        }
+                        contentString += `</div>`;
+                    }
+                    contentString += `</div>`; // End info div
+
+                    infowindow.setContent(contentString);
+                    infowindow.open(map, marker);
+                } else {
+                    console.log(stat);
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD3esafwShGXpUBOTZBaV-K-ZO-Npi4pic&libraries=places&callback=tryGeolocation"
+        async defer>
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,95 @@
+#map {
+    height: 100%;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+div#detail_img {
+    width: 100%;
+    height: 400;
+}
+
+img.detail_image {
+    border-radius: 5px;
+    padding: 2px;
+    width: auto;
+    height: auto;
+    max-height: 200px;
+}
+
+i.mdi {
+    color: darkslategrey;
+    margin-right: 10px;
+}
+
+.mdi {
+    font-size: 1.3em;
+    line-height: 1.8em;
+    text-decoration: none;
+}
+
+#popup_title {
+    text-decoration: none;
+    color: rgb(22, 22, 22);
+    margin: 10px;
+}
+
+ul#hour_list {
+    list-style-type: none;
+}
+
+li.schedule_item {
+    list-style-type: none;
+    line-height: 1.8em;
+    font-size: 1.2em;
+}
+
+div.day {
+    display: inline-block;
+    width: 100px;
+}
+
+div.hrs {
+    display: inline-block;
+}
+
+#open {
+    color: green;
+}
+
+ul.type {
+    position: relative;
+    left: -30px;
+    top: 5px;
+    list-style-type: none;
+}
+
+li.type {
+    list-style-type: none;
+    color: gray;
+}
+
+div#title {
+    display: inline-block;
+    font-size: 1.4em;
+}
+
+div.list {
+    display: inline-block;
+    color: gray;
+    line-height: 1.3em;
+    font-size: 0.85em;
+}
+
+a.ti {
+    text-decoration: none;
+}
+
+span#titleline {
+    margin-top: 10px;
+}
