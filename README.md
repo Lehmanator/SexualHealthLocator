@@ -1,5 +1,6 @@
 # SexualHealthLocator
 <img src="https://raw.githubusercontent.com/samlehman617/SexualHealthLocator/master/screenshot.png" width="350"/>
+
 [![Build Status](https://travis-ci.com/samlehman617/SexualHealthLocator.svg?branch=master)](https://travis-ci.com/samlehman617/SexualHealthLocator)
 [![HitCount](http://hits.dwyl.io/samlehman617/samlehman617/resume.svg)](http://hits.dwyl.io/samlehman617/samlehman617/resume)
 
