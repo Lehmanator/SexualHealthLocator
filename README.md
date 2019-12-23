@@ -9,7 +9,7 @@
 </h1>
 <h4>A single-page React app to help users find nearby resources for healthcare for sexual and mental health, family planning, and general well-being.</h4>
   <h3 align="center">
-    <img text-align="middle" src="https://raw.githubusercontent.com/samlehman617/SexualHealthLocator/master/screenshot.png" width="350"/>
+    <img text-align="middle" src="https://raw.githubusercontent.com/samlehman617/SexualHealthLocator/master/screenshot.png" width="80%"/>
    <h3>
 </div>
 
